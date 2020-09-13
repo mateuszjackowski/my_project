@@ -1,0 +1,33 @@
+{%  extends 'accounts/main.html' %}
+
+{% block content %}
+
+	<br>
+
+	<div class="row">
+		<div class="col-md">
+			<div class="card card-body">
+				<h5>Samples</h5>
+			</div>
+			<div class="card card-body">
+				<table class="table">
+					<tr>
+						<th>Sample</th>
+						<th>Category</th>
+						<th>Modification</th>
+					</tr>
+
+					{% for sample in samples %}
+						<tr>
+							<td>{{sample.name}}</td>
+							<td>{{sample.category}}</td>
+							<td>{{sample.modification}}</td>
+						</tr>
+					{% endfor %}
+
+				</table>
+			</div>
+		</div>
+	</div>
+
+{% endblock content %}
