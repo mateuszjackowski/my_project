@@ -60,7 +60,7 @@ def home(request):
     return render(request, 'accounts/dashboard.html', ctx)
 
 @login_required(login_url='login')
-@allowed_users(allowed_roles=['executor'])
+@allowed_users(allowed_roles=['executor', 'admin'])
 def userPage(request):
     tests = request.user.executor.test_set.all()
     total_tests = tests.count()
@@ -69,16 +69,17 @@ def userPage(request):
     ctx = {'tests': tests,
            'total_tests': total_tests,
            'tested': tested,
+           'executor': request.user.executor,
            'in_research': in_research}
     return render(request, 'accounts/user.html', ctx)
 
 @login_required(login_url='login')
-@allowed_users(allowed_roles=['executor'])
+@allowed_users(allowed_roles=['executor', 'admin'])
 def accountSettings(request):
     executor = request.user.executor
     form = ExecutorForm(instance=executor)
     if request.method == 'POST':
-        form = ExecutorForm(request.POST, request.FILES,instance=executor)
+        form = ExecutorForm(request.POST, request.FILES, instance=executor)
         if form.is_valid():
             form.save()
     ctx = {'form': form}
@@ -106,7 +107,6 @@ def executor(request, pk):
     return render(request, 'accounts/executor.html', ctx)
 
 @login_required(login_url='login')
-@allowed_users(allowed_roles=['admin'])
 def createTest(request, pk):
     TestFormSet = inlineformset_factory(Executor, Test, fields=('sample', 'status'), extra=10)
     executor = Executor.objects.get(id=pk)
@@ -117,12 +117,11 @@ def createTest(request, pk):
         formset = TestFormSet(request.POST, instance=executor)
         if formset.is_valid():
             formset.save()
-            return redirect('/')
+            return redirect('home')
     ctx = {'formset': formset}
     return render( request, 'accounts/test_form.html', ctx)
 
 @login_required(login_url='login')
-@allowed_users(allowed_roles=['admin'])
 def updateTest(request, pk):
     test = Test.objects.get(id=pk)
     form = TestForm(instance=test)
@@ -130,9 +129,9 @@ def updateTest(request, pk):
         form = TestForm(request.POST, instance=test)
         if form.is_valid():
             form.save()
-            return redirect('/')
+            return redirect('home')
     ctx = {'form': form}
-    return render( request, 'accounts/test_form.html', ctx)
+    return render(request, 'accounts/test_form.html', ctx)
 
 @login_required(login_url='login')
 @admin_only
@@ -140,6 +139,6 @@ def deleteTest(request, pk):
     test = Test.objects.get(id=pk)
     if request.method == 'POST':
         test.delete()
-        return redirect('/')
+        return redirect('home')
     ctx = {'test': test}
     return render( request, 'accounts/delete.html', ctx)
